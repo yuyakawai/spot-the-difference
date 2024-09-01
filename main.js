@@ -143,7 +143,6 @@ const init = () => {
   messageWrapContainer.element.appendChild(statusMessageContainer.element);
 
   initQuestion();
-
   tick();
 };
 
