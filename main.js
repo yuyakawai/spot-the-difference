@@ -1,8 +1,14 @@
+const gameParameters = {
+  initialRemainingTime: 60,
+};
+
 const gameStatus = {
   currentScene: null,
   isGameStart: false,
   isGameClear: false,
   isGameOver: false,
+  startTime: 0,
+  remainingTime: 0,
 };
 
 const mainContainer = {
@@ -15,6 +21,12 @@ const screenContainer = {
   element: null,
   width: mainContainer.width - 10,
   height: mainContainer.height - 10,
+};
+
+const timeMessageContainer = {
+  element: null,
+  width: screenContainer.width,
+  height: screenContainer.height * 0.1,
 };
 
 window.onload = () => {
@@ -51,11 +63,34 @@ const init = () => {
   screenContainer.element.style.justifyContent = "center";
   mainContainer.element.appendChild(screenContainer.element);
 
+  timeMessageContainer.element = document.createElement("div");
+  timeMessageContainer.element.style.position = "relative";
+  timeMessageContainer.element.style.width = timeMessageContainer.width + "px";
+  timeMessageContainer.element.style.height =
+    timeMessageContainer.height + "px";
+  timeMessageContainer.element.style.margin = "1px";
+  timeMessageContainer.element.style.fontSize = "20px";
+  timeMessageContainer.element.textContent =
+    "⌛ " + gameParameters.initialRemainingTime.toFixed(2);
+  mainContainer.element.appendChild(timeMessageContainer.element);
+
   tick();
 };
 
 const tick = () => {
-  // gameStatus.currentScene.update();
+  gameStatus.remainingTime = Math.max(
+    0,
+    gameParameters.initialRemainingTime -
+      (performance.now() - gameStatus.startTime) / 1000
+  );
+
+  timeMessageContainer.element.textContent =
+    "⌛ " + gameStatus.remainingTime.toFixed(2);
+
+  if (gameStatus.remainingTime <= 0) {
+    gameStatus.isGameOver = true;
+    showGameOverMessage();
+  }
   requestAnimationFrame(tick);
 };
 
