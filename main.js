@@ -27,16 +27,22 @@ const screenContainer = {
   height: mainContainer.height - 10,
 };
 
+const messageWrapContainer = {
+  element: null,
+  width: mainContainer.width,
+  height: mainContainer.height * 0.1,
+};
+
 const timeMessageContainer = {
   element: null,
-  width: screenContainer.width,
-  height: screenContainer.height * 0.1,
+  width: messageWrapContainer.width / 2,
+  height: messageWrapContainer.height * 0.8,
 };
 
 const statusMessageContainer = {
   element: null,
-  width: screenContainer.width,
-  height: screenContainer.height * 0.1,
+  width: messageWrapContainer.width / 2,
+  height: messageWrapContainer.height * 0.8,
 };
 
 const characterData = [
@@ -90,40 +96,51 @@ const init = () => {
   screenContainer.element.style.justifyContent = "center";
   mainContainer.element.appendChild(screenContainer.element);
 
+  messageWrapContainer.element = document.createElement("div");
+  messageWrapContainer.element.style.position = "relative";
+  messageWrapContainer.element.style.width = messageWrapContainer.width + "px";
+  messageWrapContainer.element.style.height =
+    messageWrapContainer.height + "px";
+  messageWrapContainer.element.style.display = "flex";
+  messageWrapContainer.element.style.alignItems = "center";
+  messageWrapContainer.element.style.justifyContent = "center";
+  mainContainer.element.appendChild(messageWrapContainer.element);
+
   timeMessageContainer.element = document.createElement("div");
   timeMessageContainer.element.style.position = "relative";
   timeMessageContainer.element.style.display = "flex";
   timeMessageContainer.element.style.alignItems = "center";
   timeMessageContainer.element.style.justifyContent = "center";
-  timeMessageContainer.element.style.backgroundColor = "red";
-  timeMessageContainer.element.style.width =
-    timeMessageContainer.width / 2 + "px";
+  timeMessageContainer.element.style.backgroundColor = "pink";
+  timeMessageContainer.element.style.width = timeMessageContainer.width + "px";
   timeMessageContainer.element.style.height =
     timeMessageContainer.height + "px";
-  timeMessageContainer.element.style.margin = "1px";
+  timeMessageContainer.element.style.margin = "3px";
+  timeMessageContainer.element.style.borderRadius = "50px";
   timeMessageContainer.element.style.fontSize = "20px";
   timeMessageContainer.element.textContent =
     "⌛ " + gameParameters.initialRemainingTime.toFixed(2);
-  mainContainer.element.appendChild(timeMessageContainer.element);
+  messageWrapContainer.element.appendChild(timeMessageContainer.element);
 
   statusMessageContainer.element = document.createElement("div");
   statusMessageContainer.element.style.position = "relative";
   statusMessageContainer.element.style.display = "flex";
   statusMessageContainer.element.style.alignItems = "center";
   statusMessageContainer.element.style.justifyContent = "center";
-  statusMessageContainer.element.style.backgroundColor = "blue";
+  statusMessageContainer.element.style.backgroundColor = "lightcyan";
   statusMessageContainer.element.style.width =
-    statusMessageContainer.width / 2 + "px";
+    statusMessageContainer.width + "px";
   statusMessageContainer.element.style.height =
     statusMessageContainer.height + "px";
-  statusMessageContainer.element.style.margin = "1px";
+  statusMessageContainer.element.style.margin = "3px";
+  statusMessageContainer.element.style.borderRadius = "50px";
   statusMessageContainer.element.style.fontSize = "20px";
   statusMessageContainer.element.textContent =
     "問題 " +
     gameStatus.questionNumber +
     "/" +
     gameParameters.maxQuestionNumber;
-  mainContainer.element.appendChild(statusMessageContainer.element);
+  messageWrapContainer.element.appendChild(statusMessageContainer.element);
 
   initQuestion();
 
