@@ -27,6 +27,12 @@ const screenContainer = {
   height: mainContainer.height - 10,
 };
 
+const timeMessageContainer = {
+  element: null,
+  width: screenContainer.width,
+  height: screenContainer.height * 0.1,
+};
+
 const statusMessageContainer = {
   element: null,
   width: screenContainer.width,
@@ -84,16 +90,39 @@ const init = () => {
   screenContainer.element.style.justifyContent = "center";
   mainContainer.element.appendChild(screenContainer.element);
 
+  timeMessageContainer.element = document.createElement("div");
+  timeMessageContainer.element.style.position = "relative";
+  timeMessageContainer.element.style.display = "flex";
+  timeMessageContainer.element.style.alignItems = "center";
+  timeMessageContainer.element.style.justifyContent = "center";
+  timeMessageContainer.element.style.backgroundColor = "red";
+  timeMessageContainer.element.style.width =
+    timeMessageContainer.width / 2 + "px";
+  timeMessageContainer.element.style.height =
+    timeMessageContainer.height + "px";
+  timeMessageContainer.element.style.margin = "1px";
+  timeMessageContainer.element.style.fontSize = "20px";
+  timeMessageContainer.element.textContent =
+    "⌛ " + gameParameters.initialRemainingTime.toFixed(2);
+  mainContainer.element.appendChild(timeMessageContainer.element);
+
   statusMessageContainer.element = document.createElement("div");
   statusMessageContainer.element.style.position = "relative";
+  statusMessageContainer.element.style.display = "flex";
+  statusMessageContainer.element.style.alignItems = "center";
+  statusMessageContainer.element.style.justifyContent = "center";
+  statusMessageContainer.element.style.backgroundColor = "blue";
   statusMessageContainer.element.style.width =
-    statusMessageContainer.width + "px";
+    statusMessageContainer.width / 2 + "px";
   statusMessageContainer.element.style.height =
     statusMessageContainer.height + "px";
   statusMessageContainer.element.style.margin = "1px";
   statusMessageContainer.element.style.fontSize = "20px";
   statusMessageContainer.element.textContent =
-    "⌛ " + gameParameters.initialRemainingTime.toFixed(2);
+    "問題 " +
+    gameStatus.questionNumber +
+    "/" +
+    gameParameters.maxQuestionNumber;
   mainContainer.element.appendChild(statusMessageContainer.element);
 
   initQuestion();
@@ -112,10 +141,10 @@ const tick = () => {
       (performance.now() - gameStatus.startTime) / 1000
   );
 
+  timeMessageContainer.element.textContent =
+    "⌛ " + gameStatus.remainingTime.toFixed(2);
+
   statusMessageContainer.element.textContent =
-    "⌛ " +
-    gameStatus.remainingTime.toFixed(2) +
-    " " +
     "問題 " +
     gameStatus.questionNumber +
     "/" +
