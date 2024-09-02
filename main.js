@@ -1,5 +1,5 @@
 const gameParameters = {
-  maxQuestionNumber: 2,
+  maxQuestionNumber: 5,
   initialRemainingTime: 60,
 };
 
@@ -11,8 +11,9 @@ const gameStatus = {
   startTime: 0,
   remainingTime: 0,
   questionNumber: 0,
-  character: null,
-  dummyCharacter: null,
+  character: "漢",
+  dummyCharacter: "漢",
+  completedQuestions: [],
 };
 
 const mainContainer = {
@@ -47,15 +48,53 @@ const statusMessageContainer = {
 
 const characterData = [
   {
-    level: 1,
     character: "肉",
     dummyCharacter: "内",
   },
-  // {
-  //   level: 1,
-  //   character: "明",
-  //   dummyCharacter: "朋",
-  // },
+  {
+    character: "明",
+    dummyCharacter: "朋",
+  },
+  {
+    character: "笛",
+    dummyCharacter: "苗",
+  },
+  {
+    character: "睛",
+    dummyCharacter: "晴",
+  },
+  {
+    character: "域",
+    dummyCharacter: "城",
+  },
+  {
+    character: "堀",
+    dummyCharacter: "掘",
+  },
+  {
+    character: "諭",
+    dummyCharacter: "輪",
+  },
+  {
+    character: "裁",
+    dummyCharacter: "栽",
+  },
+  {
+    character: "徴",
+    dummyCharacter: "微",
+  },
+  {
+    character: "洒",
+    dummyCharacter: "酒",
+  },
+  {
+    character: "因",
+    dummyCharacter: "困",
+  },
+  {
+    character: "荼",
+    dummyCharacter: "茶",
+  },
 ];
 
 const cellRow = 8;
@@ -111,7 +150,7 @@ const init = () => {
   timeMessageContainer.element.style.display = "flex";
   timeMessageContainer.element.style.alignItems = "center";
   timeMessageContainer.element.style.justifyContent = "center";
-  timeMessageContainer.element.style.backgroundColor = "pink";
+  timeMessageContainer.element.style.backgroundColor = "#deb887";
   timeMessageContainer.element.style.width = timeMessageContainer.width + "px";
   timeMessageContainer.element.style.height =
     timeMessageContainer.height + "px";
@@ -127,7 +166,7 @@ const init = () => {
   statusMessageContainer.element.style.display = "flex";
   statusMessageContainer.element.style.alignItems = "center";
   statusMessageContainer.element.style.justifyContent = "center";
-  statusMessageContainer.element.style.backgroundColor = "lightcyan";
+  statusMessageContainer.element.style.backgroundColor = "#deb887";
   statusMessageContainer.element.style.width =
     statusMessageContainer.width + "px";
   statusMessageContainer.element.style.height =
@@ -136,56 +175,35 @@ const init = () => {
   statusMessageContainer.element.style.borderRadius = "50px";
   statusMessageContainer.element.style.fontSize = "20px";
   statusMessageContainer.element.textContent =
-    "問題 " +
-    gameStatus.questionNumber +
-    "/" +
-    gameParameters.maxQuestionNumber;
+    "問 " + gameStatus.questionNumber + "/" + gameParameters.maxQuestionNumber;
   messageWrapContainer.element.appendChild(statusMessageContainer.element);
 
-  initQuestion();
+  cells.forEach((cell) => cell.init());
+  gameStatus.currentScene = scene.find((e) => e.name === "title");
   tick();
 };
 
 const tick = () => {
-  if (gameStatus.isGameClear || gameStatus.isGameOver) {
-    return;
-  }
-
-  gameStatus.remainingTime = Math.max(
-    0,
-    gameParameters.initialRemainingTime -
-      (performance.now() - gameStatus.startTime) / 1000
-  );
-
-  timeMessageContainer.element.textContent =
-    "⌛ " + gameStatus.remainingTime.toFixed(2);
-
-  statusMessageContainer.element.textContent =
-    "問題 " +
-    gameStatus.questionNumber +
-    "/" +
-    gameParameters.maxQuestionNumber;
-
-  if (gameStatus.remainingTime <= 0) {
-    gameStatus.isGameOver = true;
-    showGameOverMessage();
-    return;
-  }
+  gameStatus.currentScene.update();
   requestAnimationFrame(tick);
 };
 
 const initQuestion = () => {
   if (gameStatus.questionNumber >= gameParameters.maxQuestionNumber) {
     gameStatus.isGameClear = true;
-    showGameClearMessage();
     return;
   }
   gameStatus.questionNumber++;
+  gameStatus.completedQuestions.push(gameStatus.character);
 
-  const char =
-    characterData[[Math.floor(Math.random() * characterData.length)]];
-  gameStatus.character = char.character;
-  gameStatus.dummyCharacter = char.dummyCharacter;
+  const availableCharacters = characterData.filter(
+    (char) => !gameStatus.completedQuestions.includes(char.character)
+  );
+  const selectedCharacter =
+    availableCharacters[Math.floor(Math.random() * availableCharacters.length)];
+
+  gameStatus.character = selectedCharacter.character;
+  gameStatus.dummyCharacter = selectedCharacter.dummyCharacter;
 
   cells.forEach((cell) => cell.init());
   cells[[Math.floor(Math.random() * cells.length)]].element.textContent =
@@ -241,7 +259,36 @@ const scene = [
   },
   {
     name: "gamePlay",
-    update: () => {},
+    update: () => {
+      if (gameStatus.isGameClear) {
+        showGameClearMessage();
+        return;
+      }
+
+      if (gameStatus.isGameOver) {
+        showGameOverMessage();
+        return;
+      }
+
+      gameStatus.remainingTime = Math.max(
+        0,
+        gameParameters.initialRemainingTime -
+          (performance.now() - gameStatus.startTime) / 1000
+      );
+
+      timeMessageContainer.element.textContent =
+        "⌛ " + gameStatus.remainingTime.toFixed(2);
+
+      statusMessageContainer.element.textContent =
+        "問 " +
+        gameStatus.questionNumber +
+        "/" +
+        gameParameters.maxQuestionNumber;
+
+      if (gameStatus.remainingTime <= 0) {
+        gameStatus.isGameOver = true;
+      }
+    },
   },
   {
     name: "gameOver",
@@ -265,27 +312,28 @@ const scene = [
   },
 ];
 
-const updateGameOver = () => {};
-
-const updateGameClear = () => {};
-
 const versionMessage = {
   version: "ver.1.0.0",
   draw: () => {},
 };
 
-const stageMessage = {
-  wait: 0,
-  draw: () => {},
-};
-
-const drawGameOverMessage = () => {};
-
-const drawGameClearMessage = () => {};
-
-const drawStageClearMessage = () => {};
-
 const resetGame = () => {};
+
+const showTitleMessage = () => {
+  let messageElement = document.createElement("div");
+  messageElement.style.position = "relative";
+  messageElement.style.zIndex = "1";
+  messageElement.style.width = screenContainer.width * 0.8 + "px";
+  messageElement.style.height = screenContainer.height * 0.15 + "px";
+  messageElement.style.display = "flex";
+  messageElement.style.alignItems = "center";
+  messageElement.style.justifyContent = "center";
+  messageElement.style.backgroundColor = "#f5deb3";
+  messageElement.style.color = "blue";
+  messageElement.style.fontSize = "32px";
+  messageElement.textContent = "スタート";
+  screenContainer.element.appendChild(messageElement);
+};
 
 const showGameClearMessage = () => {
   let messageElement = document.createElement("div");
