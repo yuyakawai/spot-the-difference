@@ -1,6 +1,6 @@
 const gameParameters = {
   maxQuestionNumber: 5,
-  initialRemainingTime: 6,
+  initialRemainingTime: 60,
 };
 
 const gameStatus = {
@@ -169,7 +169,7 @@ const init = () => {
   timeMessageContainer.element.style.borderRadius = "50px";
   timeMessageContainer.element.style.fontSize = "20px";
   timeMessageContainer.element.textContent =
-    "⌛ " + gameParameters.initialRemainingTime.toFixed(2);
+    "残り時間 " + gameParameters.initialRemainingTime.toFixed(2);
   messageWrapContainer.element.appendChild(timeMessageContainer.element);
 
   statusMessageContainer.element = document.createElement("div");
@@ -307,7 +307,7 @@ const scene = [
       );
 
       timeMessageContainer.element.textContent =
-        "⌛ " + gameStatus.remainingTime.toFixed(2);
+        "残り時間 " + gameStatus.remainingTime.toFixed(2);
 
       statusMessageContainer.element.textContent =
         "問 " +
@@ -324,8 +324,7 @@ const scene = [
     name: "gameOver",
     update: () => {
       showGameOverMessage();
-      //showRetryMessage();
-      isGameStart = false;
+      gameStatus.isGameStart = false;
       gameStatus.currentScene = scene.find((e) => e.name === "ready");
     },
   },
@@ -333,48 +332,73 @@ const scene = [
     name: "gameClear",
     update: () => {
       showGameClearMessage();
-      //showRetryMessage();
-      isGameStart = false;
+      gameStatus.isGameStart = false;
       gameStatus.currentScene = scene.find((e) => e.name === "ready");
     },
   },
 ];
 
 const showTitleMessage = () => {
+  let wrapElement = document.createElement("div");
+  wrapElement.style.position = "relative";
+  wrapElement.style.zIndex = "1";
+  wrapElement.style.width = screenContainer.width + "px";
+  wrapElement.style.height = screenContainer.height * 0.4 + "px";
+  wrapElement.style.display = "flex";
+  wrapElement.style.flexDirection = "column";
+  wrapElement.style.alignItems = "center";
+  wrapElement.style.justifyContent = "center";
+
   let messageElement = document.createElement("div");
   messageElement.style.position = "relative";
   messageElement.style.zIndex = "1";
-  messageElement.style.width = screenContainer.width * 0.7 + "px";
-  messageElement.style.height = screenContainer.height * 0.1 + "px";
+  messageElement.style.width = screenContainer.width * 0.9 + "px";
+  messageElement.style.height = screenContainer.height * 0.15 + "px";
   messageElement.style.display = "flex";
   messageElement.style.alignItems = "center";
   messageElement.style.justifyContent = "center";
-  messageElement.style.backgroundColor = "#deb887";
-  messageElement.style.color = "black";
-  messageElement.style.fontSize = "28px";
-  messageElement.style.border = "3px solid #b99679";
-  messageElement.style.borderRadius = "50px";
-  messageElement.style.cursor = "pointer";
-  messageElement.textContent = "スタート";
+  messageElement.style.backgroundColor = "#f5deb3";
+  messageElement.style.borderRadius = "15px";
+  messageElement.style.fontSize = "25px";
+  messageElement.textContent = "漢字間違い探しゲーム";
+  wrapElement.appendChild(messageElement);
+
+  let startButtonElement = document.createElement("div");
+  startButtonElement.style.position = "relative";
+  startButtonElement.style.zIndex = "1";
+  startButtonElement.style.width = screenContainer.width * 0.7 + "px";
+  startButtonElement.style.height = screenContainer.height * 0.1 + "px";
+  startButtonElement.style.marginTop = "10px";
+  startButtonElement.style.display = "flex";
+  startButtonElement.style.alignItems = "center";
+  startButtonElement.style.justifyContent = "center";
+  startButtonElement.style.backgroundColor = "#deb887";
+  startButtonElement.style.color = "black";
+  startButtonElement.style.fontSize = "28px";
+  startButtonElement.style.border = "3px solid #b99679";
+  startButtonElement.style.borderRadius = "50px";
+  startButtonElement.style.cursor = "pointer";
+  startButtonElement.textContent = "始める";
   const handleCellTouchEvent = (e) => {
     e.preventDefault();
     gameStatus.isGameStart = true;
-    messageElement.remove();
+    wrapElement.remove();
   };
 
   if (window.ontouchstart === null) {
-    messageElement.ontouchstart = handleCellTouchEvent;
+    startButtonElement.ontouchstart = handleCellTouchEvent;
   } else {
-    messageElement.onpointerdown = handleCellTouchEvent;
+    startButtonElement.onpointerdown = handleCellTouchEvent;
   }
-  screenContainer.element.appendChild(messageElement);
+  wrapElement.appendChild(startButtonElement);
+  screenContainer.element.appendChild(wrapElement);
 };
 
 const showGameClearMessage = () => {
   let messageElement = document.createElement("div");
   messageElement.style.position = "relative";
   messageElement.style.zIndex = "1";
-  messageElement.style.width = screenContainer.width * 0.8 + "px";
+  messageElement.style.width = screenContainer.width * 0.85 + "px";
   messageElement.style.height = screenContainer.height * 0.15 + "px";
   messageElement.style.display = "flex";
   messageElement.style.alignItems = "center";
@@ -382,16 +406,26 @@ const showGameClearMessage = () => {
   messageElement.style.backgroundColor = "#f5deb3";
   messageElement.style.borderRadius = "15px";
   messageElement.style.color = "blue";
-  messageElement.style.fontSize = "36px";
+  messageElement.style.fontSize = "32px";
   messageElement.textContent = "Game Clear !!";
   screenContainer.element.appendChild(messageElement);
 };
 
 const showGameOverMessage = () => {
+  let wrapElement = document.createElement("div");
+  wrapElement.style.position = "relative";
+  wrapElement.style.zIndex = "1";
+  wrapElement.style.width = screenContainer.width + "px";
+  wrapElement.style.height = screenContainer.height * 0.4 + "px";
+  wrapElement.style.display = "flex";
+  wrapElement.style.flexDirection = "column";
+  wrapElement.style.alignItems = "center";
+  wrapElement.style.justifyContent = "center";
+
   let messageElement = document.createElement("div");
   messageElement.style.position = "relative";
   messageElement.style.zIndex = "1";
-  messageElement.style.width = screenContainer.width * 0.8 + "px";
+  messageElement.style.width = screenContainer.width * 0.85 + "px";
   messageElement.style.height = screenContainer.height * 0.15 + "px";
   messageElement.style.display = "flex";
   messageElement.style.alignItems = "center";
@@ -399,16 +433,47 @@ const showGameOverMessage = () => {
   messageElement.style.backgroundColor = "#f5deb3";
   messageElement.style.borderRadius = "15px";
   messageElement.style.color = "red";
-  messageElement.style.fontSize = "32px";
+  messageElement.style.fontSize = "34px";
   messageElement.textContent = "Game Over";
-  screenContainer.element.appendChild(messageElement);
+  wrapElement.appendChild(messageElement);
+
+  let retryButtonElement = document.createElement("div");
+  retryButtonElement.style.position = "relative";
+  retryButtonElement.style.zIndex = "1";
+  retryButtonElement.style.width = screenContainer.width * 0.8 + "px";
+  retryButtonElement.style.height = screenContainer.height * 0.1 + "px";
+  retryButtonElement.style.marginTop = "10px";
+  retryButtonElement.style.display = "flex";
+  retryButtonElement.style.alignItems = "center";
+  retryButtonElement.style.justifyContent = "center";
+  retryButtonElement.style.backgroundColor = "#deb887";
+  retryButtonElement.style.color = "black";
+  retryButtonElement.style.fontSize = "28px";
+  retryButtonElement.style.border = "3px solid #b99679";
+  retryButtonElement.style.borderRadius = "50px";
+  retryButtonElement.style.cursor = "pointer";
+  retryButtonElement.textContent = "もう一度遊ぶ";
+  const handleCellTouchEvent = (e) => {
+    e.preventDefault();
+    gameStatus.reset();
+    gameStatus.isGameStart = true;
+    wrapElement.remove();
+  };
+
+  if (window.ontouchstart === null) {
+    retryButtonElement.ontouchstart = handleCellTouchEvent;
+  } else {
+    retryButtonElement.onpointerdown = handleCellTouchEvent;
+  }
+  wrapElement.appendChild(retryButtonElement);
+  screenContainer.element.appendChild(wrapElement);
 };
 
 const showRetryMessage = () => {
   let messageElement = document.createElement("div");
   messageElement.style.position = "relative";
   messageElement.style.zIndex = "1";
-  messageElement.style.width = screenContainer.width * 0.7 + "px";
+  messageElement.style.width = screenContainer.width * 0.8 + "px";
   messageElement.style.height = screenContainer.height * 0.1 + "px";
   messageElement.style.display = "flex";
   messageElement.style.alignItems = "center";
