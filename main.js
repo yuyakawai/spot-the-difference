@@ -1,6 +1,6 @@
 const gameParameters = {
   maxQuestionNumber: 5,
-  initialRemainingTime: 60,
+  initialRemainingTime: 6,
 };
 
 const gameStatus = {
@@ -14,6 +14,17 @@ const gameStatus = {
   character: "漢",
   dummyCharacter: "漢",
   completedQuestions: [],
+  reset: () => {
+    gameStatus.isGameStart = false;
+    gameStatus.isGameClear = false;
+    gameStatus.isGameOver = false;
+    gameStatus.startTime = 0;
+    gameStatus.remainingTime = 0;
+    gameStatus.questionNumber = 0;
+    gameStatus.character = "漢";
+    gameStatus.dummyCharacter = "漢";
+    gameStatus.completedQuestions = [];
+  },
 };
 
 const mainContainer = {
@@ -179,7 +190,7 @@ const init = () => {
   messageWrapContainer.element.appendChild(statusMessageContainer.element);
 
   cells.forEach((cell) => cell.init());
-  gameStatus.currentScene = scene.find((e) => e.name === "title");
+  gameStatus.currentScene = scene.find((e) => e.name === "init");
   tick();
 };
 
@@ -237,6 +248,14 @@ const cells = [...Array(cellRow * cellCol)].fill().map((_, index) => ({
 
     const handleCellTouchEvent = (e) => {
       e.preventDefault();
+      if (
+        gameStatus.isGameStart === false ||
+        gameStatus.isGameOver ||
+        gameStatus.isGameClear
+      ) {
+        return;
+      }
+
       if (e.target.textContent === gameStatus.character) {
         initQuestion();
       }
@@ -252,21 +271,32 @@ const cells = [...Array(cellRow * cellCol)].fill().map((_, index) => ({
 
 const scene = [
   {
-    name: "title",
+    name: "init",
     update: () => {
-      updateTitle();
+      showTitleMessage();
+      gameStatus.currentScene = scene.find((e) => e.name === "ready");
+    },
+  },
+  {
+    name: "ready",
+    update: () => {
+      if (gameStatus.isGameStart) {
+        initQuestion();
+        gameStatus.startTime = performance.now();
+        gameStatus.currentScene = scene.find((e) => e.name === "gamePlay");
+      }
     },
   },
   {
     name: "gamePlay",
     update: () => {
       if (gameStatus.isGameClear) {
-        showGameClearMessage();
+        gameStatus.currentScene = scene.find((e) => e.name === "gameClear");
         return;
       }
 
       if (gameStatus.isGameOver) {
-        showGameOverMessage();
+        gameStatus.currentScene = scene.find((e) => e.name === "gameOver");
         return;
       }
 
@@ -292,46 +322,51 @@ const scene = [
   },
   {
     name: "gameOver",
-    update: () => {},
+    update: () => {
+      showGameOverMessage();
+      //showRetryMessage();
+      isGameStart = false;
+      gameStatus.currentScene = scene.find((e) => e.name === "ready");
+    },
   },
   {
     name: "gameClear",
-    update: () => {},
-  },
-  {
-    name: "stageClearBirdDown",
-    update: () => {},
-  },
-  {
-    name: "stageClearJellySpeech",
-    update: () => {},
-  },
-  {
-    name: "nextStageMove",
-    update: () => {},
+    update: () => {
+      showGameClearMessage();
+      //showRetryMessage();
+      isGameStart = false;
+      gameStatus.currentScene = scene.find((e) => e.name === "ready");
+    },
   },
 ];
-
-const versionMessage = {
-  version: "ver.1.0.0",
-  draw: () => {},
-};
-
-const resetGame = () => {};
 
 const showTitleMessage = () => {
   let messageElement = document.createElement("div");
   messageElement.style.position = "relative";
   messageElement.style.zIndex = "1";
-  messageElement.style.width = screenContainer.width * 0.8 + "px";
-  messageElement.style.height = screenContainer.height * 0.15 + "px";
+  messageElement.style.width = screenContainer.width * 0.7 + "px";
+  messageElement.style.height = screenContainer.height * 0.1 + "px";
   messageElement.style.display = "flex";
   messageElement.style.alignItems = "center";
   messageElement.style.justifyContent = "center";
-  messageElement.style.backgroundColor = "#f5deb3";
-  messageElement.style.color = "blue";
-  messageElement.style.fontSize = "32px";
+  messageElement.style.backgroundColor = "#deb887";
+  messageElement.style.color = "black";
+  messageElement.style.fontSize = "28px";
+  messageElement.style.border = "3px solid #b99679";
+  messageElement.style.borderRadius = "50px";
+  messageElement.style.cursor = "pointer";
   messageElement.textContent = "スタート";
+  const handleCellTouchEvent = (e) => {
+    e.preventDefault();
+    gameStatus.isGameStart = true;
+    messageElement.remove();
+  };
+
+  if (window.ontouchstart === null) {
+    messageElement.ontouchstart = handleCellTouchEvent;
+  } else {
+    messageElement.onpointerdown = handleCellTouchEvent;
+  }
   screenContainer.element.appendChild(messageElement);
 };
 
@@ -345,6 +380,7 @@ const showGameClearMessage = () => {
   messageElement.style.alignItems = "center";
   messageElement.style.justifyContent = "center";
   messageElement.style.backgroundColor = "#f5deb3";
+  messageElement.style.borderRadius = "15px";
   messageElement.style.color = "blue";
   messageElement.style.fontSize = "36px";
   messageElement.textContent = "Game Clear !!";
@@ -361,8 +397,40 @@ const showGameOverMessage = () => {
   messageElement.style.alignItems = "center";
   messageElement.style.justifyContent = "center";
   messageElement.style.backgroundColor = "#f5deb3";
+  messageElement.style.borderRadius = "15px";
   messageElement.style.color = "red";
   messageElement.style.fontSize = "32px";
   messageElement.textContent = "Game Over";
+  screenContainer.element.appendChild(messageElement);
+};
+
+const showRetryMessage = () => {
+  let messageElement = document.createElement("div");
+  messageElement.style.position = "relative";
+  messageElement.style.zIndex = "1";
+  messageElement.style.width = screenContainer.width * 0.7 + "px";
+  messageElement.style.height = screenContainer.height * 0.1 + "px";
+  messageElement.style.display = "flex";
+  messageElement.style.alignItems = "center";
+  messageElement.style.justifyContent = "center";
+  messageElement.style.backgroundColor = "#deb887";
+  messageElement.style.color = "black";
+  messageElement.style.fontSize = "28px";
+  messageElement.style.border = "3px solid #b99679";
+  messageElement.style.borderRadius = "50px";
+  messageElement.style.cursor = "pointer";
+  messageElement.textContent = "もう一度遊ぶ";
+  const handleCellTouchEvent = (e) => {
+    e.preventDefault();
+    gameStatus.isGameStart = true;
+    gameStatus.reset();
+    messageElement.remove();
+  };
+
+  if (window.ontouchstart === null) {
+    messageElement.ontouchstart = handleCellTouchEvent;
+  } else {
+    messageElement.onpointerdown = handleCellTouchEvent;
+  }
   screenContainer.element.appendChild(messageElement);
 };
